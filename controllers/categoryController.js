@@ -16,14 +16,14 @@ exports.categories = function(req,res){
 
 exports.category = function (req,res){
     connect.query(`SELECT * FROM category WHERE id=${req.params.id}`, function (error, rows, fields){
-        if (rows=="") {
-            return res.send({
-                error:true,
-                message : "failed name"
-            })
+        if (error) {
+            console.log(error);
         }else{
-            if (error) {
-                console.log(error);
+            if (rows=="") {
+                return res.send({
+                    error:true,
+                    message : "id not found"
+                })
             }else{
                 response.ok(rows,res);
             }
@@ -45,6 +45,7 @@ exports.add = function(req,res){
             function (error, rows, fields){
                 if (error) {
                     throw error
+
                 }else{
                     return res.send({
                         error:false,
@@ -84,20 +85,20 @@ exports.update = function(req,res){
         );
     }
 };
-//ERORR
+
 exports.delete = function(req,res){
     let id = req.params.id;
     connect.query(
         `delete from category where id=${id}`,
         function (error, rows, fields){
-            if (rows.affectedRows=="") {
-                return res.send({
-                    error:true,
-                    message : `failed delete id ${id}`
-                });
+            if (error) {
+                throw error
             }else{
-                if (error) {
-                    throw error
+                if (rows.affectedRows=="") {
+                    return res.send({
+                        error:true,
+                        message : `failed delete id ${id}`
+                    });
                 }else{
                     return res.send({
                         error:false,
