@@ -3,26 +3,26 @@
 const response = require('../response');
 const connect = require('../connect');
 
-exports.welcome = function(req,res){
-    response.ok('welcome', res);
+exports.welcome = function(req, res){
+    response.ok('welcome qwe', res);
 }
 
-exports.notes = function(req,res){
+exports.showAll = function(req, res){
     connect.query('SELECT * FROM note ', function (error, rows, fields){
         if (error) {
             console.log(error);
         }else{
-            response.ok(rows,res);
+            response.ok(rows, res);
         }
     });
 };
 
-exports.note = function(req,res){
+exports.showById = function(req, res){
     connect.query(`SELECT * FROM note WHERE id=${req.params.id}`, function (error, rows, fields){
         if (error) {
             console.log(error);
         }else{
-            if (rows=="") {
+            if (rows == "") {
                 return res.send({
                     error:true,
                     message : "id not found"
@@ -35,19 +35,19 @@ exports.note = function(req,res){
     });
 };
 
-exports.add = function(req,res){
+exports.add = function(req, res){
     let title = req.body.title;
     let text = req.body.text;
-    let id_categoryFK = req.body.id_categoryFK;
-    if (title=="" || text==""||id_categoryFK=="") {
+    let idCategory = req.body.idCategory;
+    if (title == "" || text == ""||idCategory == "") {
         return res.send({
             error:true,
             message : "failed name"
         })
     }else{
         connect.query(
-            'INSERT INTO note SET title=?, text=?, id_categoryFK=?',
-            [title, text, id_categoryFK],
+            'INSERT INTO note SET title=?, text=?, idCategory=?',
+            [title, text, idCategory],
             function (error, rows, fields){
                 if (error) {
                     throw error
@@ -61,16 +61,14 @@ exports.add = function(req,res){
             }
         );
     }
-    
-
 }
 
-exports.update = function(req,res){
+exports.update = function(req, res){
     let id = req.params.id;
     let title = req.body.title;
     let text = req.body.text;
     let idcategory = req.body.id_categoryFK;
-    if (title=="" || text==""||idcategory=="") {
+    if (title == "" || text == ""||idcategory == "") {
         return res.send({
             error:true,
             message : "failed name"
@@ -78,7 +76,6 @@ exports.update = function(req,res){
     }else{
         connect.query(
             `update note set title="${title}", text="${text}", id_categoryFK="${idcategory}" where id=${id}`,
-            
             function (error, rows, fields){
                 if (error) {
                     throw error
@@ -92,7 +89,6 @@ exports.update = function(req,res){
             }
         );
     }
-    
 };
 
 exports.delete = function(req,res){
@@ -105,12 +101,12 @@ exports.delete = function(req,res){
             }else{
                 if (rows.affectedRows=="") {
                     return res.send({
-                        error:true,
+                        error: true,
                         message : `failed delete id ${id}`
                     });
                 }else{
                     return res.send({
-                        error:false,
+                        error: false,
                         data: rows,
                         message: "data has been Deleted",
                     });

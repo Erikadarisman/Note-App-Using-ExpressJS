@@ -2,27 +2,17 @@
 
 module.exports = function (app){
     const note = require('./controllers/noteController');
-    //GET
     app.get('/', note.welcome);
-    app.get('/notes', note.notes);
-    app.get('/note/:id', note.note); //single
-    //post
-    app.post('/note', note.add);
-    //PATCH /edit
-    app.patch('/note/:id', note.update); //update
-    //delete
-    app.delete('/note/:id',note.delete);
+    app.get('/notes', note.showAll);
+    app.get('/notes/:id', note.showById);
+    app.post('/notes', note.add);
+    app.patch('/notes/:id', note.update);
+    app.delete('/notes/:id', note.delete);
 
     const category = require('./controllers/categoryController');
-    
-    //GET
-    app.get('/categories', category.categories);
-    app.get('/category/:id', category.category);//single
-    //POST
+    app.get('/categories', category.showAll);
+    app.get('/category/:id', category.showById);
     app.post('/category', category.add);
-    //PATCH
     app.patch('/category/:id', category.update);
-    //delete
     app.delete('/category/:id', category.delete);
-
 }
