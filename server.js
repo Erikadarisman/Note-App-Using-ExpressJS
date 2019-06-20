@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const routes = require('./routes');
 const cors = require('cors');
 
-var whitelist = ['http://192.168.100.55', 'http://192.168.100.77', 'http://localhost', '']
+var whitelist = ['http://192.168.100.55', 'http://192.168.100.77', 'localhost']
 
 var corsOptions = {
     origin: function (origin, callback) {
@@ -19,7 +19,7 @@ var corsOptions = {
     }
 }
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 app.use(
     bodyParser.urlencoded({

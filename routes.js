@@ -10,7 +10,7 @@ module.exports = function (app){
     app.delete('/notes/:id', note.delete);
 
     const category = require('./controllers/categoryController');
-    app.get('/categories', category.showAll);
+    app.get('/category', category.showAll);
     app.get('/category/:id', category.showById);
     app.post('/category', category.add);
     app.patch('/category/:id', category.update);

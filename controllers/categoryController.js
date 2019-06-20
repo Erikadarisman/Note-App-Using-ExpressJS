@@ -33,9 +33,10 @@ exports.showById = function (req, res){
 exports.add = function(req, res){
     let name = req.body.name;
     if (!name) {
+        console.log(name);
         return res.send({
             error: true,
-            message: "failed name"
+            message: "failed request body name"
         })
     }else{
         connect.query(
@@ -62,7 +63,7 @@ exports.update = function(req, res){
     if (name == "") {
         return res.send({
             error: true,
-            message : "failed name"
+            message : "failed request body name"
         });
     }else{
         connect.query(
