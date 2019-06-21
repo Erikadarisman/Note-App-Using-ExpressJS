@@ -8,3 +8,16 @@ exports.ok = function (values, res){
     res.json(data);
     res.end();
 }
+
+exports.pagination = function (rows, totalData, start, limit, res){
+    const data = {
+        status: 200,
+        values: rows,
+        page: start,
+        totalData: totalData,
+        totalPage: Math.ceil(totalData/limit),
+        limit: limit
+    };
+    res.json(data);
+    res.end();
+}

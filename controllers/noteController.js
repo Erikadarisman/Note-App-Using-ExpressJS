@@ -10,30 +10,36 @@ exports.welcome = function(req, res){
 }
 
 exports.showAll = function(req, res){
-    var sql = `SELECT note.id, title, text, category.id as idCategory, name FROM category INNER JOIN note ON category.id = note.id_categoryFK`;
+    var sort = 'DESC'
+    var sql = `SELECT note.id, title, text, time, category.id as idCategory, name FROM category INNER JOIN note ON category.id = note.id_categoryFK`;
     var queryCount = `SELECT COUNT(title) AS TotalData FROM note`;
 
     if (!isEmpty(req.query.search)) {
         let search = req.query.search;
         sql += ` WHERE title like '%${search}%'`
+        var totalSearch = sql;
     }
 
     if (!isEmpty(req.query.sort)) {
         let sort = req.query.sort;
-        sql += ` ORDER BY id ${sort}`
+        sql += ` ORDER BY time ${sort}`
+    }else{
+        let sort = req.query.sort;
+        sql += ` ORDER BY time desc`
     }
-    
-    var start, limit;
-    (isEmpty(req.query.page) || req.query.page == '') ? start = 1 : start = parseInt(req.query.page);
-    (isEmpty(req.query.limit) || req.query.limit == '') ? limit = 10 : limit = parseInt(req.query.limit);
+
+    var start = 1;
+    var limit = 10;
+    if (!isEmpty(req.query.page)) {
+        start = parseInt(req.query.page);
+    }
+    if (!isEmpty(req.query.limit)) {
+        limit = parseInt(req.query.limit);
+    }
 
     var startpage = (start - 1) * limit;
     sql += ` LIMIT ${limit} OFFSET ${startpage}`;
 
-
-
-
-    
     connect.query(sql, function (error, rows, fields){
         if (error) {
             console.log(error);
@@ -44,14 +50,15 @@ exports.showAll = function(req, res){
                     error: true
                 })
             }else{
-                connect.query('SELECT * from note', function(error, row, fileds){
-                    res.json({
-                        status: 200,
-                        values: rows,
-                        page: start,
-                        totalData: row.length,
-                        totalPage: Math.ceil(row.length/limit),
-                        limit: limit
+                connect.query('SELECT * from note', function(error, row, fields){
+                    connect.query(totalSearch, function(error, search, fields){
+                        var totalData;
+                        if (isEmpty(req.query.search)) {
+                            totalData = row.length
+                        }else{
+                            totalData = search.length 
+                        }
+                        response.pagination(rows, totalData, start, limit, res);
                     })
                 })
             }
@@ -72,8 +79,7 @@ exports.showById = function(req, res){
             }else{
                 response.ok (rows, res);
             }
-        }
-        
+        }  
     });
 };
 
