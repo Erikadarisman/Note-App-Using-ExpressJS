@@ -10,8 +10,9 @@ exports.welcome = function(req, res){
 }
 
 exports.showAll = function(req, res){
+    
     var sort = 'DESC'
-    var sql = `SELECT note.id, title, text, time, category.id as idCategory, name FROM category INNER JOIN note ON category.id = note.id_categoryFK`;
+    var sql = `SELECT note.id, title, text, note.created_at, note.updated_at, name as category FROM category INNER JOIN note ON category.id = note.idCategory`;
     var queryCount = `SELECT COUNT(title) AS TotalData FROM note`;
 
     if (!isEmpty(req.query.search)) {
@@ -22,10 +23,10 @@ exports.showAll = function(req, res){
 
     if (!isEmpty(req.query.sort)) {
         let sort = req.query.sort;
-        sql += ` ORDER BY time ${sort}`
+        sql += ` ORDER BY created_at ${sort}`
     }else{
         let sort = req.query.sort;
-        sql += ` ORDER BY time desc`
+        sql += ` ORDER BY created_at desc`
     }
 
     var start = 1;
@@ -58,6 +59,8 @@ exports.showAll = function(req, res){
                         }else{
                             totalData = search.length 
                         }
+                        console.log(sql);
+                        
                         response.pagination(rows, totalData, start, limit, res);
                     })
                 })
@@ -87,16 +90,17 @@ exports.add = function(req, res){
     let title = req.body.title;
     let text = req.body.text;
     let idCategory = req.body.idCategory;
-    if (title == "" || text == ""||idCategory == "") {
+
+    if (isEmpty(title) && isEmpty(text) && isEmpty(idCategory)) {
         return res.send({
             error:true,
-            message : "failed name"
-        })
-    }else{
+            message : "failed Input"
+        });
+    } else {
         connect.query(
-            'INSERT INTO note SET title=?, text=?, id_categoryFK=?',
+            'INSERT INTO note SET title=?, text=?, idCategory=?',
             [title, text, idCategory],
-            function (error, rows, fields){
+            function (error, rows, fields) {
                 if (error) {
                     throw error
                 }else{
@@ -107,36 +111,50 @@ exports.add = function(req, res){
                     });
                 }
             }
-        );
+        )
     }
 }
 
-exports.update = function(req, res){
+exports.update = function(req,res){
     let id = req.params.id;
     let title = req.body.title;
     let text = req.body.text;
     let idCategory = req.body.idCategory;
-    if (title == "" || text == ""||idCategory == "") {
-        return res.send({
-            error:true,
-            message : "failed request body"
-        });
-    }else{
-        connect.query(
-            `update note set title="${title}", text="${text}", id_categoryFK="${idCategory}" where id=${id}`,
-            function (error, rows, fields){
-                if (error) {
-                    throw error
-                }else{
-                    return res.send({
-                        error:false,
-                        data: rows,
-                        message: "data has been Updated",
-                    });
-                }
-            }
-        );
+
+    let sql = `update note set updated_at=now(), `;
+
+    if (!isEmpty(title)) {
+        sql += `title="${title}"`;
     }
+    if(!isEmpty(title) && !isEmpty(text) ) {
+        sql += ', '
+    }
+
+    if (!isEmpty(text)) {
+        sql += `text="${text}"`;
+    }
+    if(!isEmpty(text) && !isEmpty(idCategory)) {
+        sql += ', '
+    }
+
+    if (!isEmpty(idCategory)) {
+        sql += `idCategory="${idCategory}"`;
+    }
+
+    sql += `where id=${id}`
+
+
+    connect.query(sql, function(error, rows, fields){
+        if (error) {
+            throw error
+        }else{
+            return res.send({
+                error:false,
+                data: rows,
+                message: "data has been Updated",
+            });
+        }
+    })
 };
 
 exports.delete = function(req,res){

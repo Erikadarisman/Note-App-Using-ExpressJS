@@ -1,13 +1,14 @@
+require('dotenv/config');
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT||3000;
 const bodyParser = require('body-parser');
+const routes = require('./routes');
 
 //cors
-const routes = require('./routes');
 const cors = require('cors');
 
-var whitelist = ['http://192.168.100.55', 'http://192.168.100.77', 'localhost']
+var whitelist = ['http://192.168.100.55', 'http://192.168.100.77']
 
 var corsOptions = {
     origin: function (origin, callback) {
@@ -21,6 +22,17 @@ var corsOptions = {
 
 // app.use(cors(corsOptions));
 
+//middleware
+app.use(
+    function logOriginalUrl (req, res, next){
+        console.log('----------');
+        console.log('Request URL: ', req.originalUrl);
+        console.log('request Type: ', req.method);
+        console.log('port ', port);
+        next();
+    }
+)
+
 app.use(
     bodyParser.urlencoded({
         extended: true,
@@ -29,7 +41,7 @@ app.use(
 
 app.use(bodyParser.json());
 
-routes(app, corsOptions);
+routes(app);
 
 app.listen(port);
 console.log(`Listening on port ${port}!`);

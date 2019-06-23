@@ -67,7 +67,7 @@ exports.update = function(req, res){
         });
     }else{
         connect.query(
-            `update category set name="${name}" where id=${id}`,
+            `update category set name="${name}", updated_at=now() where id=${id}`,
             function (error, rows, fields){
                 if (error) {
                     throw error

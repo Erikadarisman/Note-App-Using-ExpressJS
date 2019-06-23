@@ -9,10 +9,10 @@ module.exports = function (app){
     app.patch('/notes/:id', note.update);
     app.delete('/notes/:id', note.delete);
 
-    const category = require('./controllers/categoryController');
-    app.get('/category', category.showAll);
-    app.get('/category/:id', category.showById);
-    app.post('/category', category.add);
-    app.patch('/category/:id', category.update);
-    app.delete('/category/:id', category.delete);
+    const categories = require('./controllers/categoriesController');
+    app.get('/categories', categories.showAll);
+    app.get('/categories/:id', categories.showById);
+    app.post('/categories', categories.add);
+    app.patch('/categories/:id', categories.update);
+    app.delete('/categories/:id', categories.delete);
 }
