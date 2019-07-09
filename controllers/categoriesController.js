@@ -32,6 +32,7 @@ exports.showById = function (req, res){
 
 exports.add = function(req, res){
     let name = req.body.name;
+    let image = req.body.image;
     if (!name) {
         console.log(name);
         return res.send({
@@ -40,17 +41,23 @@ exports.add = function(req, res){
         })
     }else{
         connect.query(
-            'INSERT INTO category SET name=?',
-            [name],
+            'INSERT INTO category SET name=?, image=?',
+            [name,image],
             function (error, rows, fields){
                 if (error) {
                     throw error
                 }else{
-                    return res.send({
-                        error: false,
-                        data: rows,
-                        message: "category has been created",
-                    });
+                    connect.query(
+                        'SELECT * FROM category WHERE name=? AND image=? ',
+                        [name,image],
+                        function (error, rows, fields){
+                            return res.send({
+                                error: false,
+                                data: rows,
+                                message: "category has been created",
+                            });
+                        }
+                    )
                 }
             }
         );
@@ -99,7 +106,7 @@ exports.delete = function(req, res){
                 }else{
                     return res.send({
                         error: false,
-                        data: rows,
+                        data: {rows,id},
                         message: "category has been Deleted",
                     });
                 }

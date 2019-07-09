@@ -11,13 +11,16 @@ exports.welcome = function(req, res){
 
 exports.showAll = function(req, res){
     
-    var sort = 'DESC'
-    var sql = `SELECT note.id, title, text, note.created_at, note.updated_at, name as category FROM category INNER JOIN note ON category.id = note.idCategory`;
-    var queryCount = `SELECT COUNT(title) AS TotalData FROM note`;
+    var sql = `SELECT note.id, title, text, note.created_at, note.updated_at, name as category, category.id as idCategory FROM category right JOIN note ON category.id = note.idCategory`;
 
     if (!isEmpty(req.query.search)) {
         let search = req.query.search;
         sql += ` WHERE title like '%${search}%'`
+        var totalSearch = sql;
+    }
+    if (!isEmpty(req.query.category)) {
+        let category = req.query.category;
+        sql += ` WHERE category.name = '${category}'`
         var totalSearch = sql;
     }
 
@@ -25,7 +28,6 @@ exports.showAll = function(req, res){
         let sort = req.query.sort;
         sql += ` ORDER BY created_at ${sort}`
     }else{
-        let sort = req.query.sort;
         sql += ` ORDER BY created_at desc`
     }
 
@@ -54,9 +56,10 @@ exports.showAll = function(req, res){
                 connect.query('SELECT * from note', function(error, row, fields){
                     connect.query(totalSearch, function(error, search, fields){
                         var totalData;
-                        if (isEmpty(req.query.search)) {
+                        if (isEmpty(req.query.search)&&isEmpty(req.query.category)) {
                             totalData = row.length
-                        }else{
+                        }
+                        else{
                             totalData = search.length 
                         }
                         console.log(sql);
@@ -104,11 +107,17 @@ exports.add = function(req, res){
                 if (error) {
                     throw error
                 }else{
-                    return res.send({
-                        error:false,
-                        data: rows,
-                        message: "data has been created",
-                    });
+                    connect.query(
+                        'SELECT max(note.id) AS id, title, text, note.created_at, note.updated_at, name as category FROM category right JOIN note ON category.id = note.idCategory where title=? AND text=?',
+                        [title, text],
+                        function (error, rows, fields){
+                            return res.send({
+                                error: false,
+                                data: rows,
+                                message: "category has been created",
+                            });
+                        }
+                    )
                 }
             }
         )
@@ -148,14 +157,21 @@ exports.update = function(req,res){
         if (error) {
             throw error
         }else{
-            return res.send({
-                error:false,
-                data: rows,
-                message: "data has been Updated",
-            });
+            connect.query(
+                'SELECT max(note.id) AS id, title, text, note.created_at, note.updated_at, name as category FROM category right JOIN note ON category.id = note.idCategory where note.id=?',
+                [id],
+                function (error, rows, fields){
+                    return res.send({
+                        error: false,
+                        data: rows,
+                        message: "category has been created",
+                    });
+                }
+            )
         }
     })
 };
+
 
 exports.delete = function(req,res){
     let id = req.params.id;
@@ -173,7 +189,7 @@ exports.delete = function(req,res){
                 }else{
                     return res.send({
                         error: false,
-                        data: rows,
+                        data: {rows,id},
                         message: "data has been Deleted",
                     });
                 }
